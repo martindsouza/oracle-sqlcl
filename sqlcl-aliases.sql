@@ -1,3 +1,8 @@
+set serveroutput on
+set sqlformat ansiconsole
+
+
+-- Aliases
 alias invalid=select
   uo.object_name,
   uo.object_type
