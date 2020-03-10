@@ -40,6 +40,26 @@ where 1=1
 order by c_fk.table_name
 ;
 
+alias tabconstraints = 
+select
+  uc.constraint_type,
+  uc.constraint_name,
+  uc.search_condition_vc,
+  acc.column_name
+from dual
+  join user_constraints uc on 1=1
+  join all_cons_columns acc on 1=1
+    and uc.owner = acc.owner
+    and uc.constraint_name = acc.constraint_name
+where 1=1
+  and uc.owner = user
+  and uc.table_name = upper(:table_name)
+order by 
+  decode(uc.constraint_type, 'P', 1, 'R', 2, 'U', 3, 'C', 4, 5),
+  acc.position,
+  -- Handle not nulls lower
+  case when constraint_name like 'SYS%' then 2 else 1 end
+;
 
 alias compile_all=begin
   dbms_utility.compile_schema(schema => user,  compile_all => false);
