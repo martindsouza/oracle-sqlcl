@@ -11,3 +11,8 @@ where 1=1
   and uo.status != 'VALID'
 order by uo.object_name
 /
+
+alias compile_all=begin
+  dbms_utility.compile_schema(schema => user,  compile_all => false);
+end;
+/
