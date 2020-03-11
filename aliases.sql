@@ -41,7 +41,7 @@ alias findfk=
   order by c_fk.table_name
 ;
 
-alias tabconstraints = 
+alias tabconstraints= 
   select
     uc.constraint_type,
     uc.constraint_name,
@@ -62,18 +62,34 @@ alias tabconstraints =
     case when constraint_name like 'SYS%' then 2 else 1 end
 ;
 
-alias create_view=
+-- Generates view code for a given table
+-- @param table_name
+alias gen_view=
+  with data as (
+    select 
+      chr(10) lf,
+      lower(:table_name) table_name,
+      lower(apex_string.get_initials(:table_name, 10)) tab_name_alias
+    from dual
+  )
   select 
-    'create or replace force view ' || lower(utc.table_name) || '_v as' || chr(10) ||
-    'select' || chr(10) ||
-    listagg('  acroynm_changeme.' || lower(utc.column_name), ',' || chr(10)) within group (order by utc.column_id asc) || chr(10) ||
-    'from dual ' || chr(10) ||
-    '  join ' || lower(utc.table_name) || ' acroynm_changeme on 1=1' || chr(10) || 
-    ';' view_code
-  from user_tab_columns utc
+    apex_string.format(
+      'create or replace force view %1_v as %0' ||
+      'select %0' ||
+      listagg('  %2.' || lower(utc.column_name), ',' || d.lf) within group (order by utc.column_id asc) || d.lf ||
+      'from dual %0' ||
+      '  join %1 %2 on 1=1%0' || 
+      ';' 
+    , d.lf, d.table_name, d.tab_name_alias) view_code
+  from dual
+    join data d on 1=1
+    join user_tab_columns utc on 1=1
   where 1=1
-    and utc.table_name = upper(:table_name)
-  group by utc.table_name
+    and utc.table_name = upper(d.table_name)
+  group by 
+    d.lf,
+    d.table_name,
+    d.tab_name_alias
 ;
 
 alias compile_all=
