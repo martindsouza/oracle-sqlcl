@@ -1,5 +1,7 @@
 set serveroutput on
 set sqlformat ansiconsole
+-- Sets the number of rows before new column header is shown
+set pagesize 40 
 
 
 -- Aliases
@@ -92,8 +94,7 @@ alias gen_view=
     d.tab_name_alias
 ;
 
-alias compile_all=
-  begin
+alias compile_all=begin
     dbms_utility.compile_schema(schema => user,  compile_all => false);
   end;
 /
